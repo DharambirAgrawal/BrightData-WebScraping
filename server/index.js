@@ -1,6 +1,23 @@
+import express from 'express'
+import { configDotenv } from 'dotenv';
+configDotenv()
+
 import axios from 'axios';
 
+const app =express()
+
 const cheerio = await import('cheerio');
+
+import { applyMiddleware } from './src/middleware/middleware.js';
+
+applyMiddleware()
+
+
+import { get_readMeFile,scrapeGitHubProfile,scrapeRepositories,testing } from './src/utils/scraper.js';
+// scrapeGitHubProfile()
+// scrapeRepositories()
+testing()
+// get_readMeFile()
 
 // // Define the URL of your GitHub profile
 // const GITHUB_URL = 'https://github.com/DharambirAgrawal'; 
@@ -74,24 +91,28 @@ const cheerio = await import('cheerio');
 // scrapeGitHubProfile();
 // scrapeGitHubProfile2();
 
-const repo = 'DharambirAgrawal/DharambirAgrawal';  // Replace with the actual repo
-const url = `https://raw.githubusercontent.com/DharambirAgrawal/DharambirAgrawal/main/README.md`;  // Adjust if the file is named README.mdx
+// const repo = 'DharambirAgrawal/DharambirAgrawal';  // Replace with the actual repo
+// const url = `https://raw.githubusercontent.com/DharambirAgrawal/DharambirAgrawal/main/README.md`;  // Adjust if the file is named README.mdx
 
-// Fetch the raw content
-axios.get(url, {
-  headers: {
-    'Accept': 'application/vnd.github.v3.raw',  // Ensure raw content is fetched
-  }
-})
-  .then(response => {
-    const readmeMDX = response.data;
-    // Output the raw MDX content
-    console.log(readmeMDX);
-  })
-  .catch(error => {
-    console.error('Error fetching the README:', error);
-  });
+// // // Fetch the raw content
+// axios.get(url, {
+//   headers: {
+//     'Accept': 'application/vnd.github.v3.raw',  // Ensure raw content is fetched
+//   }
+// })
+//   .then(response => {
+//     const readmeMDX = response.data;
+//     // Output the raw MDX content
+//     console.log(readmeMDX);
+//   })
+//   .catch(error => {
+//     console.error('Error fetching the README:', error);
+//   });
 
-//   https://api.github.com/repos/DharambirAgrawal/DharambirAgrawal/contents/README.md
+// https://api.github.com/repos/DharambirAgrawal/DharambirAgrawal/contents/README.md
 // https://api.github.com/repos/DharambirAgrawal/DharambirAgrawal/contents
 // https://api.github.com/repos/DharambirAgrawal/integreat/contents
+
+app.listen(process.env.PORT,()=>{
+  console.log(`http://localhost:${process.env.PORT}`)
+})
