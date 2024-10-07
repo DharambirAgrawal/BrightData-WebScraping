@@ -1,8 +1,44 @@
 // Define the URL of your GitHub profile
 import axios from "axios";
 const cheerio = await import('cheerio');
+import { url_combiner } from "./utils.js";
+
+// const base_raw_url='https://raw.githubusercontent.com/*USER_NAME*/*REPO*'
+// const base_api_url='https://api.github.com/repos/*USER_NAME*/*REPO*'
+const base_github_url='https://github.com'
+const base_raw_url='https://raw.githubusercontent.com'
+const base_api_url='https://api.github.com'
+
+export async function scrapeRepositories(user) {
+
+    const link = `/${user}?tab=repositories`;
+
+    const URL=url_combiner(base_github_url,link)
+
+    try {
+        // Make a request to fetch the HTML content of your GitHub profile
+        const { data } = await axios.get(URL);
+
+        // Load the HTML into cheerio
+        const $ = cheerio.load(data);
 
 
+        const repos = $('h3.wb-break-all [itemprop="name codeRepository"]').map(function () {
+            return $(this).text().trim();
+        }).get();
+
+        // console.log("Number of Repositories: ", repos.length)
+        
+        // console.log("Repositories: ", repos)
+        return repos
+
+
+
+
+    } catch (error) {
+        console.error('Error fetching GitHub profile:', error);
+    }
+}
 
 export const get_readMeFile = () => {
 
@@ -49,6 +85,10 @@ export async function scrapeGitHubProfile() {
             return $(this).text().trim();
         }).get();
 
+        const profilePictureUrl = $('img.avatar').attr('src'); // Select the avatar image
+
+    console.log('Profile Picture URL:', profilePictureUrl);
+
 
         console.log('GitHub Profile Details:');
         console.log(`Name: ${name}`);
@@ -67,34 +107,41 @@ export async function scrapeGitHubProfile() {
     }
 }
 
+export async function get_repo_info(user){
+    const repos=await scrapeRepositories(user)
 
+    
+    for (let i in repos){
+        const link="/repos/"+user+"/"+repos[i]
+        console.log(link)
+        const URL=url_combiner(base_api_url,link)
+        console.log(URL)
 
-export async function scrapeRepositories() {
-    const GITHUB_URL2 = 'https://github.com/DharambirAgrawal?tab=repositories';
+        axios.get(URL, {
+            headers: {
+                'Accept': 'application/vnd.github.v3.raw',  // Ensure raw content is fetched
+            }
+        })
+            .then(response => {
+                const repoInfo = response.data;
+                console.log(repoInfo)
+                // Output the raw MDX content
+                // console.log(repoInfo);
+            })
+            .catch(error => {
+                console.error('Error fetching the README:', error);
+            });
 
-    try {
-        // Make a request to fetch the HTML content of your GitHub profile
-        const { data } = await axios.get(GITHUB_URL2);
-
-        // Load the HTML into cheerio
-        const $ = cheerio.load(data);
-
-
-        const repos = $('h3.wb-break-all [itemprop="name codeRepository"]').map(function () {
-            return $(this).text().trim();
-        }).get();
-
-        console.log("Number of Repositories: ", repos.length)
-        
-        console.log("Repositories: ", repos)
-
-
-
-
-    } catch (error) {
-        console.error('Error fetching GitHub profile:', error);
+            break
     }
+    // Fetch the raw content
+   
+
 }
+
+
+
+
 
 export const testing = () => {
 

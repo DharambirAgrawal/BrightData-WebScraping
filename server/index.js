@@ -13,10 +13,11 @@ import { applyMiddleware } from './src/middleware/middleware.js';
 applyMiddleware()
 
 
-import { get_readMeFile,scrapeGitHubProfile,scrapeRepositories,testing } from './src/utils/scraper.js';
-// scrapeGitHubProfile()
-// scrapeRepositories()
-testing()
+import { get_readMeFile,scrapeGitHubProfile,scrapeRepositories,testing ,get_repo_info} from './src/utils/scraper.js';
+scrapeGitHubProfile()
+// scrapeRepositories('DharambirAgrawal')
+// testing()
+// get_repo_info('DharambirAgrawal')
 // get_readMeFile()
 
 // // Define the URL of your GitHub profile
