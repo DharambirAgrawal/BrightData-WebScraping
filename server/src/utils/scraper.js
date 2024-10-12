@@ -87,19 +87,19 @@ export async function scrapeGitHubProfile() {
 
         const profilePictureUrl = $('img.avatar').attr('src'); // Select the avatar image
 
-    console.log('Profile Picture URL:', profilePictureUrl);
 
-
-        console.log('GitHub Profile Details:');
-        console.log(`Name: ${name}`);
-        console.log(`Username: ${username}`);
-        console.log(`Bio: ${bio}`);
-        console.log(`Followers: ${followers}`);
-        console.log(`Following: ${following}`);
-        console.log(`Public Repositories: ${repositories}`);
-        console.log('location: ', location)
-        console.log('social: ', social)
-        console.log('website: ', website)
+        return {
+            name,
+            username,
+            bio,
+            followers,
+            following,
+            repositories,
+            location,
+            social,
+            website,
+            profilePictureUrl
+        }
 
 
     } catch (error) {
@@ -108,37 +108,56 @@ export async function scrapeGitHubProfile() {
 }
 
 export async function get_repo_info(user){
-    const repos=await scrapeRepositories(user)
+ 
 
+        try {
+            const repos = await scrapeRepositories(user); // Assuming scrapeRepositories is an async function
     
-    for (let i in repos){
-        const link="/repos/"+user+"/"+repos[i]
-        console.log(link)
-        const URL=url_combiner(base_api_url,link)
-        console.log(URL)
-
-        axios.get(URL, {
-            headers: {
-                'Accept': 'application/vnd.github.v3.raw',  // Ensure raw content is fetched
-            }
-        })
-            .then(response => {
-                const repoInfo = response.data;
-                console.log(repoInfo)
-                // Output the raw MDX content
-                // console.log(repoInfo);
-            })
-            .catch(error => {
-                console.error('Error fetching the README:', error);
-            });
-
-            break
+            // Use map to create an array of promises, then await them all
+            const infos = await Promise.all(
+                repos.map(async (repository) => {
+                    const link = `/repos/${user}/${repository}`;
+                    const URL = url_combiner(base_api_url, link);
+    
+                    try {
+                        // Wait for the axios request to complete
+                        const response = await axios.get(URL, {
+                            headers: {
+                                'Accept': 'application/vnd.github.v3.raw', // Ensure raw content is fetched
+                            }
+                        });
+    
+                        const repoInfo = response.data;
+    
+                        // Return the desired repo information
+                        return {
+                            name: repoInfo.name,
+                            branch: repoInfo.default_branch,
+                            topic: repoInfo.topics,
+                            clone_url: repoInfo.clone_url,
+                            updated_at: repoInfo.updated_at,
+                            pushed_at: repoInfo.pushed_at,
+                            created_at: repoInfo.created_at,
+                            description: repoInfo.description,
+                        };
+                    } catch (error) {
+                        console.error(`Error fetching repository data for ${repository}:`, error);
+                        return null; // Handle error and return null for failed requests
+                    }
+                })
+            );
+    
+            return infos.filter(info => info !== null); // Filter out null results (if any)
+        } catch (error) {
+            console.error('Error fetching repositories:', error);
+            return [];
+        }
     }
-    // Fetch the raw content
+    
+    // Example usage:
    
-
-}
-
+    
+   
 
 
 

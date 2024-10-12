@@ -14,10 +14,13 @@ applyMiddleware()
 
 
 import { get_readMeFile,scrapeGitHubProfile,scrapeRepositories,testing ,get_repo_info} from './src/utils/scraper.js';
-scrapeGitHubProfile()
+// scrapeGitHubProfile()
 // scrapeRepositories('DharambirAgrawal')
 // testing()
 // get_repo_info('DharambirAgrawal')
+get_repo_info('DharambirAgrawal').then((infos) => {
+  console.log(infos);
+});
 // get_readMeFile()
 
 // // Define the URL of your GitHub profile
