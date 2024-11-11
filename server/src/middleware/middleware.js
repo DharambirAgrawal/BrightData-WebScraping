@@ -2,6 +2,4 @@
 
 export const applyMiddleware=()=>{
 
-
-    
 }

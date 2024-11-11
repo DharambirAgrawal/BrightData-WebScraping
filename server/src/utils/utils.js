@@ -5,7 +5,6 @@ export function url_combiner(base_url, link) {
 }
 
 export async function filter_dir(repoInfo,fileUrl=null){
-    // let fileUrl=[]
     if (fileUrl==null){
         fileUrl=[]
     }

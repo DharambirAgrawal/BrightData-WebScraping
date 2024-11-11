@@ -1,56 +1,38 @@
 import express from 'express'
 import { configDotenv } from 'dotenv';
 configDotenv()
-
-import axios from 'axios';
-
 const app =express()
 
-const cheerio = await import('cheerio');
 
+
+
+//middleware
 import { applyMiddleware } from './src/middleware/middleware.js';
-
+import { logger } from "./src/middleware/logger.js";
+import { globalLimiter, apiLimiter } from './src/middleware/rateLimiter.js';
 applyMiddleware()
+app.use(globalLimiter);
+app.all('*', logger) 
 
 
-import { get_readMeFile,scrapeGitHubProfile,scrapeRepositories,testing ,get_repo_info} from './src/utils/scraper.js';
-// scrapeGitHubProfile("DharambirAgrawal").then((info)=>{
-//   console.log(info)
-// })
-// scrapeRepositories('DharambirAgrawal')
-testing("DharambirAgrawal","Python_Primer_Chapter1").then((info)=>{
-  console.log(info)
-})
-// get_repo_info('DharambirAgrawal')
-// get_repo_info('DharambirAgrawal').then((infos) => {
-//   console.log(infos);
-// });
-// get_readMeFile("DharambirAgrawal","hackaton")
 
 
-//controller testing
-// import { get_readMeFile,get_rawFileUrls,repo_info,scrapeGitHubProfile,scrapeRepositories,get_repo_rawFiles } from './src/controller/githubcontroller.js';
 
-// const repos=await scrapeRepositories("DharambirAgrawal")
-// console.log(repos)
+//routes
+import { githubRouter } from './src/routes/githubroutes.js';
 
-// const repos=await get_readMeFile("DharambirAgrawal","DharambirAgrawal")
-// console.log(repos)
+app.use("/api", apiLimiter);
+app.use("/api/github", githubRouter);
 
-// const repos=await scrapeGitHubProfile("DharambirAgrawal")
-// console.log(repos)
+app.all("*", (req, res) => {
+  res.status(404).json({
+    status: "404 :(",
+  });
+});
 
-// const repos=await repo_info("DharambirAgrawal", "DharambirAgrawal")
-// console.log(repos)
-
-// const repos=await get_rawFileUrls("DharambirAgrawal", "Python_Primer_Chapter1")
-// console.log(repos)
-
-// const repos=await get_repo_rawFiles("DharambirAgrawal","Python_Primer_Chapter1")
-// console.log(repos)
-// console.log(repos.length)
 
 
 app.listen(process.env.PORT,()=>{
+  console.log("SERVER IS LISTENING...");
   console.log(`http://localhost:${process.env.PORT}`)
 })

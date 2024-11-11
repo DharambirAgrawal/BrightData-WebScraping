@@ -1,3 +1,3 @@
-export const base_github_url = 'https://github.com'
-export const base_raw_url = 'https://raw.githubusercontent.com'
-export const base_api_url = 'https://api.github.com'
+export const BASE_GITHUB_URL = 'https://github.com'
+export const BASE_GITHUB_RAW_URL = 'https://raw.githubusercontent.com'
+export const BASE_GITHUB_API_URL = 'https://api.github.com'
