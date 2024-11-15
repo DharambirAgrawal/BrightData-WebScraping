@@ -172,7 +172,10 @@ export const get_rawFileUrls = async (user, repo) => {
         const rawFileUrls = await filter_dir(repoInfo)
         return rawFileUrls
     } catch (err) {
-        console.log(err)
+        return {
+            status:400,
+            message:err.message
+        }
     }
 }
 

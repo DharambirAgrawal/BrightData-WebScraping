@@ -1,5 +1,5 @@
 import asyncHandler from "express-async-handler";
-import { scrapeGitHubProfile,scrapeRepositories,get_readMeFile,repo_info } from "../utils/scraper.js";
+import { scrapeGitHubProfile,scrapeRepositories,get_readMeFile,repo_info ,get_rawFileUrls} from "../utils/scraper.js";
 
 export const getProfile=asyncHandler(async(req,res)=>{
     const {user}=req.body
@@ -92,8 +92,10 @@ export const getRepoDetails=asyncHandler(async(req,res)=>{
     })
 })
 
-export const getProjects=asyncHandler(async(req,res)=>{
+export const getRepositoriesDetail=asyncHandler(async(req,res)=>{
     const {user}=req.body
+    const {isproj}=req.query 
+    const proj = isproj=='true'? true:false
 
     if (!user){
         return res.status(400).json({
@@ -110,7 +112,7 @@ export const getProjects=asyncHandler(async(req,res)=>{
  
     const repositoryInfo=await Promise.all(
         repositories.map(async (repo) => {
-            return await repo_info(user,repo,true)
+            return await repo_info(user,repo,proj)
         })
     )
     
@@ -121,7 +123,18 @@ export const getProjects=asyncHandler(async(req,res)=>{
     })
 })
 
-export const getRepoFileDetails=asyncHandler(async(req,res)=>{})
+export const getRepoFileDetails=asyncHandler(async(req,res)=>{
+
+// Eg: [{
+//     name: 'lake.jfif',
+//     path: 'Images/edits/lake.jfif',
+//     url: 'https://raw.githubusercontent.com/DharambirAgrawal/PythonPractice/main/Images/edits/lake.jfif'
+//   }]
+
+    const data=await get_rawFileUrls("DharambirAgrawal","PythonPractice")
+    console.log(data)
+    res.status(200).json({})
+})
 
 export const getRepoRawFiles=asyncHandler(async(req,res)=>{})
 
