@@ -1,5 +1,7 @@
+import express from 'express'
 
 
-export const applyMiddleware=()=>{
-
+export const applyMiddleware=(app)=>{
+    app.use(express.json())
+    
 }

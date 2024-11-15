@@ -10,7 +10,7 @@ export const githubRouter = GithubRouter
 .post("/profile", getProfile)
 .post("/repositories", getRepositories)
 .post("/profilereadme", getProfileReadme)
-.post("/projects", getProjects)
 .post("/repoinfo", getRepoDetails)
+.post("/projects", getProjects)
 .post("/reporawfiles", getRepoRawFiles)
 .post("/repofiledetails", getRepoFileDetails)

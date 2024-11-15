@@ -10,7 +10,7 @@ const app =express()
 import { applyMiddleware } from './src/middleware/middleware.js';
 import { logger } from "./src/middleware/logger.js";
 import { globalLimiter, apiLimiter } from './src/middleware/rateLimiter.js';
-applyMiddleware()
+applyMiddleware(app)
 app.use(globalLimiter);
 app.all('*', logger) 
 

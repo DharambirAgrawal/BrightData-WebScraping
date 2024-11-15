@@ -26,11 +26,11 @@ export async function scrapeRepositories(user) {
         // console.log("Repositories: ", repos)
         return repos
 
-
-
-
     } catch (error) {
-        console.error('Error fetching GitHub profile:', error);
+        return {
+            status:400,
+            message:error.message
+        }
     }
 }
 
@@ -46,10 +46,12 @@ export const get_readMeFile = async (user, repos) => {
             }
         })
         const readmeMDX = res.data
-        console.log(readmeMDX)
         return readmeMDX
     } catch (err) {
-        console.log(err)
+        return {
+            status:400,
+            message:err.message
+        }
     }
 }
 
@@ -79,11 +81,6 @@ export async function scrapeGitHubProfile(user) {
         }).get();
 
         const profilePictureUrl = $('img.avatar').attr('src'); // Select the avatar image
-
-        const readmeMDX = await get_readMeFile(user, user)
-        // console.log(readmeMDX)
-
-
         return {
             name,
             username,
@@ -95,14 +92,17 @@ export async function scrapeGitHubProfile(user) {
             social,
             website,
             profilePictureUrl,
-            readmeMDX
         }
 
 
     } catch (error) {
-        console.error('Error fetching GitHub profile:', error);
+        return {
+            status:400,
+            message:error.message
+        }
     }
 }
+
 export const repo_info = async (user, repo, onlyProject = false) => {
     const link = `/repos/${user}/${repo}`;
     const URL = url_combiner(BASE_GITHUB_API_URL, link);
@@ -118,7 +118,7 @@ export const repo_info = async (user, repo, onlyProject = false) => {
         const repoInfo = response.data;
 
         // print(repoInfo)
-        await new Promise(r => setTimeout(r, 2000));
+        // await new Promise(r => setTimeout(r, 2000));
         // Return the desired repo information
         const data = {
             name: repoInfo.name,
@@ -137,15 +137,20 @@ export const repo_info = async (user, repo, onlyProject = false) => {
         if (data.topic.includes('project')) {
             return data
         } else {
-            return null
+            return {
+                status:404,
+                message:"No project found"
+            }
         }
 
 
     } catch (error) {
-        // console.error(`Error fetching repository data for :`, error.response.data.message);
-        console.error(`Error fetching repository data for :`, error);
-
-        return null; // Handle error and return null for failed requests
+       
+        return {
+            status:400,
+            message:error.message
+        }
+     
     }
 }
 
@@ -178,7 +183,6 @@ export const get_repo_rawFiles = async (user, repo) => {
         const raw_file_list = await get_rawFileUrls(user, repo)
         const data = await Promise.all(
             raw_file_list.map(async (items) => {
-
 
                 const response = await axios.get(items.url, {
                     headers: {
