@@ -133,7 +133,7 @@ export const getRepoFileDetails=asyncHandler(async(req,res)=>{
 
     const data=await get_rawFileUrls("DharambirAgrawal","PythonPractice")
     console.log(data)
-    res.status(200).json({})
+    res.status(200).json(data)
 })
 
 export const getRepoRawFiles=asyncHandler(async(req,res)=>{})

@@ -19,6 +19,7 @@ export async function filter_dir(repoInfo,fileUrl=null){
                 })
             }
             else if (items.type=='dir'){
+                try{
                 const URL=items.url
                 const response = await axios.get(URL, {
                     headers: {
@@ -27,6 +28,9 @@ export async function filter_dir(repoInfo,fileUrl=null){
                 });
                 const repoInfo_new = response.data;
                 return await filter_dir(repoInfo_new,fileUrl)
+            } catch (err) {
+                console.log(err)
+            }
             }
         })
         
