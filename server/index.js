@@ -15,6 +15,26 @@ app.use(globalLimiter);
 app.all('*', logger) 
 
 
+// protect api using api key
+import { v4 as uuidv4 } from 'uuid';
+const apiKey = uuidv4();
+
+app.all('*',async function(req,res,next){
+  // const apiKey = req.header('x-api-key'); // Get API key from headers
+
+  // if (!apiKey) {
+  //   return res.status(401).send('API key is missing');
+  // }
+  if (apiKey==apiKey){
+    next()
+  }
+  // next()
+  res.status(400).json({
+    status:400,
+    message:"The api key is expired"
+  })
+})
+
 
 
 
