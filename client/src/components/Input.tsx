@@ -1,4 +1,4 @@
-import { scrapeAndStoreProduct } from "@/lib/actions";
+// import { scrapeAndStoreProduct } from "@/lib/actions";
 import Button from "./Button";
 import CheckBox from "./CheckBox";
 
@@ -28,8 +28,8 @@ const Input = () => {
     let amazonRegex = /^(https?:\/\/)?(www\.)?(amazon\.com)\/.*$/i;
 
     // Test if the URL matches the Amazon regex
-    amazonRegex.test(link);
-    await scrapeAndStoreProduct(link);
+    // amazonRegex.test(link);
+    // await scrapeAndStoreProduct(link);
   };
   return (
     <form action={handleAction}>
