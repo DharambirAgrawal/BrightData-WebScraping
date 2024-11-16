@@ -1,6 +1,6 @@
 import express from "express";
 
-import { getProfile,getProfileReadme,getRepositoriesDetail,getRepoDetails,getRepoFileDetails,getRepoRawFiles,getRepositories } from "../controller/githubcontroller.js";
+import { getProfile,getProfileReadme,getRepositoriesDetail,getRepoDetails,getRepoFileDetails,getRepoRawFiles,getRepositories,getRepoRawFile } from "../controller/githubcontroller.js";
 
 const GithubRouter = express.Router();
 
@@ -14,3 +14,4 @@ export const githubRouter = GithubRouter
 .post("/repositoriesdetail", getRepositoriesDetail)
 .post("/repofiledetails", getRepoFileDetails)
 .post("/reporawfiles", getRepoRawFiles)
+.post("/reporawfile", getRepoRawFile)

@@ -1,5 +1,5 @@
 import { BASE_GITHUB_API_URL, BASE_GITHUB_URL, BASE_GITHUB_RAW_URL } from "./constants.js";
-import { url_combiner,filter_dir } from "./utils.js";
+import { url_combiner, filter_dir } from "./utils.js";
 import axios from "axios";
 const cheerio = await import('cheerio');
 
@@ -28,8 +28,8 @@ export async function scrapeRepositories(user) {
 
     } catch (error) {
         return {
-            status:400,
-            message:error.message
+            status: 400,
+            message: error.message
         }
     }
 }
@@ -49,8 +49,8 @@ export const get_readMeFile = async (user, repos) => {
         return readmeMDX
     } catch (err) {
         return {
-            status:400,
-            message:err.message
+            status: 400,
+            message: err.message
         }
     }
 }
@@ -97,8 +97,8 @@ export async function scrapeGitHubProfile(user) {
 
     } catch (error) {
         return {
-            status:400,
-            message:error.message
+            status: 400,
+            message: error.message
         }
     }
 }
@@ -138,19 +138,19 @@ export const repo_info = async (user, repo, onlyProject = false) => {
             return data
         } else {
             return {
-                status:404,
-                message:"No project found"
+                status: 404,
+                message: "No project found"
             }
         }
 
 
     } catch (error) {
-       
+
         return {
-            status:400,
-            message:error.message
+            status: 400,
+            message: error.message
         }
-     
+
     }
 }
 
@@ -173,8 +173,8 @@ export const get_rawFileUrls = async (user, repo) => {
         return rawFileUrls
     } catch (err) {
         return {
-            status:400,
-            message:err.message
+            status: 400,
+            message: err.message
         }
     }
 }
@@ -204,7 +204,33 @@ export const get_repo_rawFiles = async (user, repo) => {
         )
         return data
     } catch (err) {
-        console.log(err)
+        return {
+            status: 400,
+            message: err.message
+        }
+    }
+
+}
+
+
+export const get_rawFile = async (user, repo, path) => {
+    const URL = `${BASE_GITHUB_RAW_URL}/${user}/${repo}/main/${path}`
+    try {
+        const response = await axios.get(URL);
+        const rawFile=await response.data
+
+        const filename = path.split('/')
+        return {
+            filename:filename[filename.length-1],
+            path: path,
+            raw: rawFile
+        }
+    } catch (err) {
+
+        return {
+            status: err.status || 400,
+            message: err.message
+        }
     }
 
 }

@@ -1,140 +1,211 @@
 import asyncHandler from "express-async-handler";
-import { scrapeGitHubProfile,scrapeRepositories,get_readMeFile,repo_info ,get_rawFileUrls} from "../utils/scraper.js";
+import { scrapeGitHubProfile, scrapeRepositories, get_readMeFile, repo_info, get_rawFileUrls, get_rawFile ,get_repo_rawFiles} from "../utils/scraper.js";
 
-export const getProfile=asyncHandler(async(req,res)=>{
-    const {user}=req.body
 
-    if (!user){
+// get the detail of profile of repository
+export const getProfile = asyncHandler(async (req, res) => {
+    const { user } = req.body
+
+    if (!user) {
         return res.status(400).json({
-            status:400,
+            status: 400,
         })
     }
 
-const profile=await scrapeGitHubProfile(user)
+    const profile = await scrapeGitHubProfile(user)
 
-if (profile.status==400){
-    return res.status(400).json(profile)
-}
+    if (profile.status == 400) {
+        return res.status(400).json(profile)
+    }
 
-return res.status(200).json({
-    status:200,
-    profile:profile
+    return res.status(200).json({
+        status: 200,
+        profile: profile
+    })
 })
-})
 
+// get the name of all repositories of user 
+export const getRepositories = asyncHandler(async (req, res) => {
+    const { user } = req.body
 
-export const getRepositories=asyncHandler(async(req,res)=>{
-    const {user}=req.body
-
-    if (!user){
+    if (!user) {
         return res.status(400).json({
-            status:400,
+            status: 400,
         })
     }
-    const repositories=await scrapeRepositories(user)
+    const repositories = await scrapeRepositories(user)
 
-    if (repositories.status==400){
+    if (repositories.status == 400) {
         return res.status(400).json(repositories)
     }
-    
+
 
     return res.status(200).json({
-        status:200,
-        repositories:repositories
+        status: 200,
+        repositories: repositories
     })
 })
 
+// get the readme of the profile
+export const getProfileReadme = asyncHandler(async (req, res) => {
+    const { user } = req.body
 
-export const getProfileReadme=asyncHandler(async(req,res)=>{
-    const {user}=req.body
-
-    if (!user){
+    if (!user) {
         return res.status(400).json({
-            status:400,
+            status: 400,
         })
     }
-    const profileReadme=await get_readMeFile(user,user)
+    const profileReadme = await get_readMeFile(user, user)
 
-    if (profileReadme.status==400){
+    if (profileReadme.status == 400) {
         return res.status(400).json(profileReadme)
     }
-    
+
     return res.status(200).json({
-        status:200,
-        profileReadme:String(profileReadme)
+        status: 200,
+        profileReadme: String(profileReadme)
     })
 })
 
-export const getRepoDetails=asyncHandler(async(req,res)=>{
-    const {user,repo}=req.body
 
-    const {isproj}=req.query 
+// detail of one repository 
+export const getRepoDetails = asyncHandler(async (req, res) => {
+    const { user, repo } = req.body
 
-    const proj = isproj=='true'? true:false
+    const { isproj } = req.query
+
+    const proj = isproj == 'true' ? true : false
 
 
-    if (!user || !repo){
+    if (!user || !repo) {
         return res.status(400).json({
-            status:400,
+            status: 400,
         })
     }
 
-    const repositoryInfo=await repo_info(user,repo,proj)
+    const repositoryInfo = await repo_info(user, repo, proj)
 
-    if (repositoryInfo.status==400 || repositoryInfo.status==404){
+    if (repositoryInfo.status == 400 || repositoryInfo.status == 404) {
         return res.status(400).json(repositoryInfo)
     }
-    
+
 
     return res.status(200).json({
-        status:200,
-        repositoryInfo:repositoryInfo
+        status: 200,
+        repositoryInfo: repositoryInfo
     })
 })
 
-export const getRepositoriesDetail=asyncHandler(async(req,res)=>{
-    const {user}=req.body
-    const {isproj}=req.query 
-    const proj = isproj=='true'? true:false
+// detail of all the repositories and also checking if project or not
+export const getRepositoriesDetail = asyncHandler(async (req, res) => {
+    const { user } = req.body
+    const { isproj } = req.query
+    const proj = isproj == 'true' ? true : false
 
-    if (!user){
+    if (!user) {
         return res.status(400).json({
-            status:400,
+            status: 400,
         })
     }
 
-    const repositories=await scrapeRepositories(user)
+    const repositories = await scrapeRepositories(user)
 
-    
-    if (repositories.status==400 ){
+
+    if (repositories.status == 400) {
         return res.status(400).json(repositoryInfo)
     }
- 
-    const repositoryInfo=await Promise.all(
+
+    const repositoryInfo = await Promise.all(
         repositories.map(async (repo) => {
-            return await repo_info(user,repo,proj)
+            return await repo_info(user, repo, proj)
         })
     )
-    
+
 
     return res.status(200).json({
-        status:200,
-        projects:repositoryInfo.filter((item)=>typeof(item.status) !='number') //excluding all 404 or 400
+        status: 200,
+        projects: repositoryInfo.filter((item) => typeof (item.status) != 'number') //excluding all 404 or 400
     })
 })
 
-export const getRepoFileDetails=asyncHandler(async(req,res)=>{
+// get all the file details of the repository 
+export const getRepoFileDetails = asyncHandler(async (req, res) => {
 
-// Eg: [{
-//     name: 'lake.jfif',
-//     path: 'Images/edits/lake.jfif',
-//     url: 'https://raw.githubusercontent.com/DharambirAgrawal/PythonPractice/main/Images/edits/lake.jfif'
-//   }]
+    // Eg: [{
+    //     name: 'lake.jfif',
+    //     path: 'Images/edits/lake.jfif',
+    //     url: 'https://raw.githubusercontent.com/DharambirAgrawal/PythonPractice/main/Images/edits/lake.jfif'
+    //   }]
+    const { user, repo } = req.body
 
-    const data=await get_rawFileUrls("DharambirAgrawal","PythonPractice")
-    console.log(data)
-    res.status(200).json(data)
+
+    if (!user || !repo) {
+        return res.status(400).json({
+            status: 400,
+        })
+    }
+    const data = await get_rawFileUrls(user, repo)
+    if (data.status == 400) {
+        return res.status(400).json(repositoryInfo)
+    }
+
+
+    const fileDetail = data.map((item) => {
+        return {
+            name: item.name,
+            path: item.path
+        }
+    })
+
+    res.status(200).json({
+        status: 200,
+        fileDetail
+    })
 })
 
-export const getRepoRawFiles=asyncHandler(async(req,res)=>{})
+// just to get one raw file
+export const getRepoRawFiles = asyncHandler(async (req, res) => {
+
+    const { user, repo} = req.body
+
+
+    if (!user || !repo) {
+        return res.status(400).json({
+            status: 400,
+        })
+    }
+    const rawFiles = await get_repo_rawFiles(user, repo)
+    if (rawFiles.status == 400 || rawFiles.status == 404) {
+        return res.status(rawFiles.status).json(rawFiles)
+    }
+
+    console.log(rawFiles)
+    res.status(200).json({
+        status: 200,
+        data:rawFiles
+    })
+})
+
+// get all the raw file of the repository
+export const getRepoRawFile = asyncHandler(async (req, res) => {
+
+    const { user, repo, path } = req.body
+
+
+    if (!user || !repo || !path) {
+        return res.status(400).json({
+            status: 400,
+        })
+    }
+    const rawFile = await get_rawFile(user, repo, path)
+    if (rawFile.status == 400 || rawFile.status == 404) {
+        return res.status(rawFile.status).json(rawFile)
+    }
+
+    console.log(rawFile)
+    res.status(200).json({
+        status: 200,
+        data:rawFile
+    })
+})
 
