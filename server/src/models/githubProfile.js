@@ -2,7 +2,8 @@ import mongoose from "mongoose";
 
 const githubProfile = mongoose.Schema(
   {
-    userName: { type: String, required: [true, "Please enter the Username"] },
+    username: { type: String, required: [true, "Please enter the Username"], unique: true,
+        trim: true },
     email: String,
     name:String,
     bio:String,
@@ -10,13 +11,14 @@ const githubProfile = mongoose.Schema(
     following:String,
     repositories:String,
     location:String,
-    social:String,
-    website:String,
+    social:{type:Array},
+    website:{type:Array},
     profilePictureUrl:String,
+    repositories:{type:Array}
   
   },
   { timestamps: true }
 );
 
 
-export const User = mongoose.model("GithubProfile", githubProfile);
+export const GithubProfile = mongoose.model("GithubProfile", githubProfile);

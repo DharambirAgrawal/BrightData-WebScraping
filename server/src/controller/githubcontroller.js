@@ -1,6 +1,9 @@
 import asyncHandler from "express-async-handler";
 import { scrapeGitHubProfile, scrapeRepositories, get_readMeFile, repo_info, get_rawFileUrls, get_rawFile ,get_repo_rawFiles} from "../utils/scraper.js";
+import { GithubProfile } from "../models/githubProfile.js";
 
+
+//added the features of adding to db but needed to check if user exists and not exists then first create it and update and if exists update the old data
 
 // get the detail of profile of repository
 export const getProfile = asyncHandler(async (req, res) => {
@@ -17,6 +20,19 @@ export const getProfile = asyncHandler(async (req, res) => {
     if (profile.status == 400) {
         return res.status(400).json(profile)
     }
+
+//add to databale
+const githubProfile=await GithubProfile.create(profile)
+console.log(githubProfile)
+
+if(!githubProfile){
+    return res.status(500).json({
+        status:500,
+        message:"Somerthing went wrong!"
+    })
+}
+
+
 
     return res.status(200).json({
         status: 200,
@@ -38,8 +54,11 @@ export const getRepositories = asyncHandler(async (req, res) => {
     if (repositories.status == 400) {
         return res.status(400).json(repositories)
     }
+    //saving to DB
+    console.log(repositories)
+    const githubProfile = await GithubProfile.findOneAndUpdate({username:user},{repositories:repositories})
 
-
+    console.log(githubProfile)
     return res.status(200).json({
         status: 200,
         repositories: repositories
