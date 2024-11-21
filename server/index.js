@@ -3,6 +3,8 @@ import { configDotenv } from 'dotenv';
 configDotenv()
 const app =express()
 
+import { connectDB } from "./src/config/db.js";
+connectDB();
 
 
 
