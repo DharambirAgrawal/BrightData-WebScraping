@@ -23,7 +23,6 @@ export const getProfile = asyncHandler(async (req, res) => {
 
 //add to databale
 const githubProfile=await GithubProfile.create(profile)
-console.log(githubProfile)
 
 if(!githubProfile){
     return res.status(500).json({
@@ -56,7 +55,7 @@ export const getRepositories = asyncHandler(async (req, res) => {
     }
     //saving to DB
     console.log(repositories)
-    const githubProfile = await GithubProfile.findOneAndUpdate({username:user},{repositories:repositories})
+    const githubProfile = await GithubProfile.findOneAndUpdate({username:user},{repository:repositories})
 
     console.log(githubProfile)
     return res.status(200).json({
@@ -79,6 +78,10 @@ export const getProfileReadme = asyncHandler(async (req, res) => {
     if (profileReadme.status == 400) {
         return res.status(400).json(profileReadme)
     }
+
+     //saving to DB
+     const githubReadme = await GithubProfile.findOneAndUpdate({username:user},{readme:String(profileReadme)})
+ 
 
     return res.status(200).json({
         status: 200,
@@ -107,6 +110,8 @@ export const getRepoDetails = asyncHandler(async (req, res) => {
     if (repositoryInfo.status == 400 || repositoryInfo.status == 404) {
         return res.status(400).json(repositoryInfo)
     }
+
+    console.log(repositoryInfo)
 
 
     return res.status(200).json({
@@ -139,6 +144,8 @@ export const getRepositoriesDetail = asyncHandler(async (req, res) => {
             return await repo_info(user, repo, proj)
         })
     )
+
+    console.log(repositoryInfo)
 
 
     return res.status(200).json({

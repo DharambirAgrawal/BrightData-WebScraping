@@ -14,8 +14,9 @@ const githubProfile = mongoose.Schema(
     social:{type:Array},
     website:{type:Array},
     profilePictureUrl:String,
-    repositories:{type:Array}
-  
+    repository:{type:Array},
+    readme:String,
+    repos:{ type: mongoose.Schema.Types.ObjectId, ref: "GithubRepository" },
   },
   { timestamps: true }
 );
