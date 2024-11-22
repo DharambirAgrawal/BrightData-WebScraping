@@ -6,7 +6,8 @@ const githubRepoDetail = mongoose.Schema(
         trim: true },
         repos:[
             {
-                name: String,
+                name: { type: String, required: [true, "Please enter the name"], unique: true,
+                    },
                 branch: String,
                 topic: Array,
                 clone_url: String,
@@ -14,15 +15,14 @@ const githubRepoDetail = mongoose.Schema(
                 pushed_at: String,
                 created_at: String,
                 description: mongoose.Schema.Types.Mixed,
-                files:{
-                    type:[
+                files:[
                         {
                             name: String,
                             path: String,
                             url: String
                         }
                     ]
-                }
+                
             },
         ]
     }

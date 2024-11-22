@@ -1,6 +1,7 @@
 import asyncHandler from "express-async-handler";
-import { scrapeGitHubProfile, scrapeRepositories, get_readMeFile, repo_info, get_rawFileUrls, get_rawFile ,get_repo_rawFiles} from "../utils/scraper.js";
+import { scrapeGitHubProfile, scrapeRepositories, get_readMeFile, repo_info, get_rawFileUrls, get_rawFile, get_repo_rawFiles } from "../utils/scraper.js";
 import { GithubProfile } from "../models/githubProfile.js";
+import { GithubRepoDetail } from "../models/githubRepository.js";
 
 
 //added the features of adding to db but needed to check if user exists and not exists then first create it and update and if exists update the old data
@@ -21,15 +22,15 @@ export const getProfile = asyncHandler(async (req, res) => {
         return res.status(400).json(profile)
     }
 
-//add to databale
-const githubProfile=await GithubProfile.create(profile)
+    //add to databale
+    const githubProfile = await GithubProfile.create(profile)
 
-if(!githubProfile){
-    return res.status(500).json({
-        status:500,
-        message:"Somerthing went wrong!"
-    })
-}
+    if (!githubProfile) {
+        return res.status(500).json({
+            status: 500,
+            message: "Somerthing went wrong!"
+        })
+    }
 
 
 
@@ -55,7 +56,7 @@ export const getRepositories = asyncHandler(async (req, res) => {
     }
     //saving to DB
     console.log(repositories)
-    const githubProfile = await GithubProfile.findOneAndUpdate({username:user},{repository:repositories})
+    const githubProfile = await GithubProfile.findOneAndUpdate({ username: user }, { repository: repositories })
 
     console.log(githubProfile)
     return res.status(200).json({
@@ -79,9 +80,9 @@ export const getProfileReadme = asyncHandler(async (req, res) => {
         return res.status(400).json(profileReadme)
     }
 
-     //saving to DB
-     const githubReadme = await GithubProfile.findOneAndUpdate({username:user},{readme:String(profileReadme)})
- 
+    //saving to DB
+    const githubReadme = await GithubProfile.findOneAndUpdate({ username: user }, { readme: String(profileReadme) })
+
 
     return res.status(200).json({
         status: 200,
@@ -113,7 +114,6 @@ export const getRepoDetails = asyncHandler(async (req, res) => {
 
     console.log(repositoryInfo)
 
-
     return res.status(200).json({
         status: 200,
         repositoryInfo: repositoryInfo
@@ -132,6 +132,17 @@ export const getRepositoriesDetail = asyncHandler(async (req, res) => {
         })
     }
 
+    // {
+    //     name: 'Portfolio',
+    //     branch: 'main',
+    //     topic: [],
+    //     clone_url: 'https://github.com/DharambirAgrawal/Portfolio.git',
+    //     updated_at: '2023-05-24T05:01:45Z',
+    //     pushed_at: '2023-05-24T05:01:40Z',
+    //     created_at: '2023-05-24T04:53:03Z',
+    //     description: 'Portfolio using js html and css '
+    //   }
+
     const repositories = await scrapeRepositories(user)
 
 
@@ -145,7 +156,18 @@ export const getRepositoriesDetail = asyncHandler(async (req, res) => {
         })
     )
 
-    console.log(repositoryInfo)
+    const repository = await GithubRepoDetail.findOneAndUpdate({ username: user }, {
+        username: user,
+        repos: repositoryInfo
+
+    }, { new: true, upsert: true })
+
+
+    const updatedProfile = await GithubProfile.findOneAndUpdate(
+        { username: user }, // Match the username of the profile to update
+        { repos: repository._id },  // Add the reference to the GithubRepository
+        { new: true, upsert: true } // Create if not found
+    );
 
 
     return res.status(200).json({
@@ -154,7 +176,7 @@ export const getRepositoriesDetail = asyncHandler(async (req, res) => {
     })
 })
 
-// get all the file details of the repository 
+// get all the file details of the given repository 
 export const getRepoFileDetails = asyncHandler(async (req, res) => {
 
     // Eg: [{
@@ -172,8 +194,14 @@ export const getRepoFileDetails = asyncHandler(async (req, res) => {
     }
     const data = await get_rawFileUrls(user, repo)
     if (data.status == 400) {
-        return res.status(400).json(repositoryInfo)
+        return res.status(400).json(data)
     }
+
+    const repository = await GithubRepoDetail.findOneAndUpdate({ username: user, 'repos.name': repo },
+        {
+            'repos.$.files': data
+        },
+        { new: true, upsert: true })
 
 
     const fileDetail = data.map((item) => {
@@ -183,16 +211,72 @@ export const getRepoFileDetails = asyncHandler(async (req, res) => {
         }
     })
 
+
+
     res.status(200).json({
         status: 200,
         fileDetail
     })
 })
 
+// get all the file details of all the repositories 
+//not completed yet needed to be done
+export const getAllRepoFileDetails = asyncHandler(async (req, res) => {
+    const { user } = req.body
+
+
+    if (!user) {
+        return res.status(400).json({
+            status: 400,
+        })
+    }
+
+    const repositories = await scrapeRepositories(user)
+
+    if (!repositories) {
+        return res.status(500).json({
+            status: 500,
+        })
+    }
+    const data = await Promise.all(
+        repositories.map(async (repo) => {
+            await get_rawFileUrls(user, repo)
+        })
+
+    )
+    console.log(data)
+
+    // const fileDetail = data.map((item) => {
+    //     return {
+    //         name: item.name,
+    //         path: item.path
+    //     }
+    // })
+
+    // const repository = await GithubRepoDetail.findOneAndUpdate({ username: user },{ 
+    //     username: user,
+    //     repos:repositoryInfo
+
+    // },{ new: true, upsert: true })
+
+
+    // const updatedProfile = await GithubProfile.findOneAndUpdate(
+    //     { username: user}, // Match the username of the profile to update
+    //     { repos: repository._id },  // Add the reference to the GithubRepository
+    //     { new: true, upsert: true } // Create if not found
+    //   );
+
+    res.status(200).json({
+        status: 200,
+        data
+    })
+})
+
+
 // just to get one raw file
 export const getRepoRawFiles = asyncHandler(async (req, res) => {
 
-    const { user, repo} = req.body
+    const { user, repo } = req.body
 
 
     if (!user || !repo) {
@@ -208,9 +292,11 @@ export const getRepoRawFiles = asyncHandler(async (req, res) => {
     console.log(rawFiles)
     res.status(200).json({
         status: 200,
-        data:rawFiles
+        data: rawFiles
     })
 })
+
+
 
 // get all the raw file of the repository
 export const getRepoRawFile = asyncHandler(async (req, res) => {
@@ -231,7 +317,7 @@ export const getRepoRawFile = asyncHandler(async (req, res) => {
     console.log(rawFile)
     res.status(200).json({
         status: 200,
-        data:rawFile
+        data: rawFile
     })
 })
 
